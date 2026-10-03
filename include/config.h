@@ -96,3 +96,14 @@ constexpr uint32_t WIFI_RETRY_MS = 15000;
 constexpr uint32_t FRAME_MS      = 16;    // ~60 fps
 constexpr bool     LOG_ENABLED   = true;
 constexpr uint32_t SERIAL_BAUD   = 115200;
+
+// ---------- Sanity checks: a bad value fails the build instead of crashing the device ----------
+static_assert(IDLE_BREATH_PERIOD_MS > 0 && IDLE_SHIMMER_PERIOD_MS > 0, "idle periods must be > 0");
+static_assert(VICTORY_CHASE_STEP_MS > 0, "VICTORY_CHASE_STEP_MS must be > 0");
+static_assert(ROUND_CLEARED_MS == 0 || ROUND_CLEARED_MS >= 2, "ROUND_CLEARED_MS must be 0 or >= 2");
+static_assert(ON_MS_FIRST + GAP_MS_FIRST > 0 && ON_MS_LAST + GAP_MS_LAST > 0,
+              "on + gap time must be > 0 for every round");
+static_assert(PULSE_FADE_PERCENT <= 100, "PULSE_FADE_PERCENT must be 0-100");
+static_assert(FRAME_MS > 0, "FRAME_MS must be > 0");
+static_assert(START_SEQUENCE_LEN >= 1 && START_SEQUENCE_LEN <= MAX_SEQUENCE_LEN && MAX_SEQUENCE_LEN <= 64,
+              "need 1 <= START_SEQUENCE_LEN <= MAX_SEQUENCE_LEN <= 64");
