@@ -29,8 +29,9 @@ constexpr uint8_t  NUM_STRIPS      = 4;
 constexpr uint8_t  LEDS_PER_STRIP  = 50;
 constexpr uint8_t  MAX_BRIGHTNESS  = 160;   // global brightness cap, 0-255
 constexpr uint32_t POWER_LIMIT_MA  = 1500;  // FastLED dims everything to stay under this (5 V)
-// Strip colors as 0xRRGGBB. Pure yellow (0xFFFF00) looks greenish on WS2812B, so it is warmed up.
-constexpr uint32_t STRIP_COLORS[NUM_STRIPS] = {0xFF0000, 0x00FF00, 0x0000FF, 0xFFA000};
+// Strip colors as 0xRRGGBB. WS2812B green is very bright, so yellow needs much less green than
+// 0xFFFF00 to stay distinct from the green strip. More green = yellower, less = more orange.
+constexpr uint32_t STRIP_COLORS[NUM_STRIPS] = {0xFF0000, 0x00FF00, 0x0000FF, 0xFF7000};
 
 // ---------- Buttons ----------
 constexpr uint32_t DEBOUNCE_MS = 30;  // raise if a single press registers twice
