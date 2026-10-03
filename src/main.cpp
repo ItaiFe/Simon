@@ -71,6 +71,11 @@ static void logRound() {
 }
 
 static void onOtaProgress(float fraction) {
+  // Called for every network packet; redrawing 400 LEDs each time starves WiFi and breaks uploads.
+  static uint32_t lastDraw = 0;
+  const uint32_t now = millis();
+  if (now - lastDraw < OTA_PROGRESS_FRAME_MS && fraction > 0.0f && fraction < 1.0f) return;
+  lastDraw = now;
   Animations::otaProgress(fraction);
   Leds::show();
 }

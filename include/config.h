@@ -100,6 +100,7 @@ constexpr uint32_t VICTORY_FADE_MS            = 600;   // fade back into idle
 
 // ---------- OTA ----------
 constexpr uint32_t OTA_PROGRESS_COLOR = 0x00C8FF;
+constexpr uint32_t OTA_PROGRESS_FRAME_MS = 200;  // min time between progress redraws during upload
 constexpr uint8_t  OTA_PROGRESS_LEVEL = 40;   // keep low: a bright full bar draws enough power to break uploads
 constexpr uint32_t OTA_ERROR_SHOW_MS  = 1000;  // red shown after a failed upload
 

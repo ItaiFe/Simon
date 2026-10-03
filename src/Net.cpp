@@ -52,6 +52,7 @@ void Net::begin(ProgressFn onProgress, EndFn onEnd) {
   WiFi.setHostname(HOSTNAME);  // must precede WiFi.mode() on core 2.x
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
+  WiFi.setSleep(false);  // modem sleep adds latency that makes OTA uploads drop
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   LOG("WiFi connecting to %s", WIFI_SSID);
 }
