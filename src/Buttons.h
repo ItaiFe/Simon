@@ -16,6 +16,12 @@ class Buttons {
       if (!stable_[i]) return false;
     return true;
   }
+  uint8_t heldCount() const {
+    uint8_t n = 0;
+    for (uint8_t i = 0; i < NUM_STRIPS; i++)
+      if (stable_[i]) n++;
+    return n;
+  }
   bool anyHeld() const {
     for (uint8_t i = 0; i < NUM_STRIPS; i++)
       if (stable_[i]) return true;

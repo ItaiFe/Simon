@@ -62,7 +62,8 @@ static uint32_t lastFrame = 0;
 static uint32_t lastPressAt = 0;
 static int8_t pulseStrip = -1;  // strip lit by the player's latest press, -1 = none
 static uint32_t pulseStart = 0;
-static bool startArmed = false;  // a press in Idle starts a game once every button is released
+static bool startArmed = false;    // a press in Idle starts a game once every button is released
+static bool startBlocked = false;  // 2+ buttons held = (failed) pairing attempt, never a game start
 
 static void enter(State next, uint32_t now) {
   state = next;
@@ -75,6 +76,7 @@ static void enter(State next, uint32_t now) {
   }
   if (next == State::Idle) {
     startArmed = false;
+    startBlocked = false;
     if (Flamingo::link().paired()) {
       LOG("Flamingo: unpair");
       Flamingo::link().endWithUnpair();
@@ -167,7 +169,13 @@ static void step(uint32_t now) {
         break;
       }
       if (press >= 0) startArmed = true;
-      if (startArmed && !buttons.anyHeld()) startGame(now);
+      if (buttons.heldCount() > 1) startBlocked = true;
+      if (!buttons.anyHeld()) {
+        const bool start = startArmed && !startBlocked;
+        startArmed = false;
+        startBlocked = false;
+        if (start) startGame(now);
+      }
       break;
 
     case State::PairHold:
@@ -265,7 +273,7 @@ static void step(uint32_t now) {
   }
 
   Flamingo::link().setValue(mirror);
-  Flamingo::update(now, Net::connected(), state == State::Idle);
+  Flamingo::update(now, Net::connected(), state == State::Idle || state == State::PairFlash);
   Leds::show();
 }
 

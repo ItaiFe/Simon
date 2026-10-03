@@ -6,7 +6,7 @@
 namespace Flamingo {
 FlamingoLink& link();
 void refresh();  // request a fresh host lookup on the next update()
-// Call once per frame. Lookups block up to FLAMINGO_RESOLVE_TIMEOUT_MS, so periodic retries
-// only happen when allowLookup is true (idle); refresh() forces one regardless.
+// Call once per frame. Lookups block up to FLAMINGO_RESOLVE_TIMEOUT_MS, so they only run when
+// allowLookup is true (idle / pairing flash); refresh() requests one at the next allowed frame.
 void update(uint32_t now, bool networkUp, bool allowLookup);
 }  // namespace Flamingo

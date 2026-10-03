@@ -40,7 +40,7 @@ Simon sends `[5, value]` to the same host/port:
 ## Simon side
 
 ### Pairing gesture and idle change
-- **Normal games now start on release**, not press: in IDLE a press arms a start; when all buttons are released (and no pairing happened) a normal game starts. Single presses feel the same.
+- **Normal games now start on release**, not press: in IDLE a press arms a start; when all buttons are released (and no pairing happened) a normal game starts. Single presses feel the same. Holding 2+ buttons at once never starts a game (it is a pairing attempt).
 - **Hold all four buttons:** while all four are held in IDLE, strips fill with pink over `PAIR_HOLD_MS` (2000 ms), proportional to hold time. Releasing any button before 2 s cancels: strips return to idle, no game starts.
 - **At 2 s:** Simon enters PAIR_FLASH: all strips flash pink (`PAIR_FLASH_MS`, ~800 ms) and Simon starts sending `0x20` to the Flamingo. After the flash and once all buttons are released, the paired game starts (GET_READY → SHOWING …) with mirroring on.
 - Requires `Buttons` to expose current debounced held state: `bool held(uint8_t i) const`.
@@ -62,7 +62,7 @@ After GAME_OVER or VICTORY Simon returns to IDLE unpaired; the next game is norm
 
 ### Units
 - `lib/FlamingoLink/` — pure C++, unit-tested: `FlamingoLink` holds paired flag, current value, timers; `update(now, value)` returns whether a packet must be sent now (on change or keepalive due); `endWithUnpair()/endWithWin()` queue 3 repeats; exposes the bytes to send. No Arduino deps.
-- `src/Flamingo.{h,cpp}` — UDP socket, resolves `FLAMINGO_HOST` (mDNS name or IP literal) when the network is up, retries resolution every 5 s, sends packets produced by `FlamingoLink`. Logs `Flamingo resolved <ip>` / `Flamingo unreachable`.
+- `src/Flamingo.{h,cpp}` — UDP socket, resolves `FLAMINGO_HOST` (mDNS name or IP literal), sends packets produced by `FlamingoLink`. Lookups block (≤300 ms), so they run only in IDLE (retry every 10 s while unresolved) and at pairing (PAIR_FLASH), never mid-game; a missed lookup keeps the last-known address. Logs `Flamingo at <ip>` / `Flamingo unreachable`.
 - `src/main.cpp` — new states `PairHold`, `PairFlash`; `paired` flag; each frame computes the mirror value from the state/animation and feeds `FlamingoLink`.
 - `Animations` — `pairHold(fraction)`, `pairFlash(t)`.
 

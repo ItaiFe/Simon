@@ -50,10 +50,7 @@ void Flamingo::refresh() { lookupRequested = true; }
 void Flamingo::update(uint32_t now, bool networkUp, bool allowLookup) {
   uint8_t packet[FlamingoLink::kPacketSize];
   if (!networkUp) {
-    if (hadNetwork) {
-      resolved = false;
-      lookupRequested = true;
-    }
+    if (hadNetwork) lookupRequested = true;  // re-check later, but keep the last-known address
     hadNetwork = false;
     while (linkInstance.poll(now, packet)) {
     }  // nowhere to send: drop due packets so repeats/keepalive state stays current
@@ -62,12 +59,18 @@ void Flamingo::update(uint32_t now, bool networkUp, bool allowLookup) {
   hadNetwork = true;
 
   const bool retryDue = allowLookup && !resolved && now - lastLookup >= FLAMINGO_RESOLVE_RETRY_MS;
-  if (lookupRequested || retryDue) {
+  // Lookups block, so they only ever run where the caller allows (never mid-game).
+  if (allowLookup && (lookupRequested || retryDue)) {
     lookupRequested = false;
     lastLookup = now;
-    resolved = lookup();
-    if (resolved) LOG("Flamingo at %s", flamingoIp.toString().c_str());
-    else LOG("Flamingo unreachable (%s)", FLAMINGO_HOST);
+    if (lookup()) {
+      resolved = true;
+      LOG("Flamingo at %s", flamingoIp.toString().c_str());
+    } else if (resolved) {
+      LOG("Flamingo lookup missed, keeping %s", flamingoIp.toString().c_str());
+    } else {
+      LOG("Flamingo unreachable (%s)", FLAMINGO_HOST);
+    }
   }
 
   if (!linkInstance.poll(now, packet) || !resolved) return;
