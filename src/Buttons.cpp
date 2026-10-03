@@ -6,7 +6,8 @@ static const uint8_t PINS[NUM_STRIPS] = {BUTTON_PIN_RED, BUTTON_PIN_GREEN, BUTTO
 
 void Buttons::begin() {
   for (uint8_t i = 0; i < NUM_STRIPS; i++) {
-    pinMode(PINS[i], INPUT_PULLUP);
+    // GPIO 34-39 are input-only without internal pull-ups (external resistor required).
+    pinMode(PINS[i], PINS[i] >= 34 ? INPUT : INPUT_PULLUP);
     lastRaw_[i] = false;
     stable_[i] = false;
     changedAt_[i] = 0;

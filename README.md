@@ -6,12 +6,16 @@ Simon on an ESP32 with 4 buttons and 4 WS2812B LED strips. Flash once over USB, 
 
 | Color  | Button GPIO (other leg → GND) | Strip data GPIO |
 |--------|-------------------------------|-----------------|
-| Red    | 13 | 2  |
-| Green  | 12 | 4  |
-| Blue   | 14 | 5  |
-| Yellow | 27 | 18 |
+| Red    | 39 | 2  |
+| Green  | 36 | 4  |
+| Blue   | 15 | 12 |
+| Yellow | 35 | 14 |
 
-Strips: 5 V and GND from a 5 V supply; tie supply GND to ESP32 GND. Buttons use the ESP32's internal pull-ups (no resistors).
+Strips: 5 V and GND from a 5 V supply; tie supply GND to ESP32 GND.
+
+**Buttons on 35, 36 and 39 need a 10 kΩ pull-up resistor each** (GPIO → 10 kΩ → 3.3 V). Those pins are input-only and have no internal pull-up — without the resistor the button floats and fires random presses. Blue (GPIO 15) uses the internal pull-up, no resistor needed.
+
+**Strapping pins:** GPIO 2 and 12 (red and blue strip data) affect boot. If the board ever fails to boot or flash with the strips attached, unplug those two data wires while flashing/booting.
 
 ## Setup
 

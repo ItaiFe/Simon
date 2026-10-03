@@ -8,15 +8,17 @@
 // =====================================================================
 
 // ---------- Pins (ESP32 GPIO numbers) ----------
-#define BUTTON_PIN_RED     13
-#define BUTTON_PIN_GREEN   12
-#define BUTTON_PIN_BLUE    14
-#define BUTTON_PIN_YELLOW  27
+// Buttons: GPIO -> button -> GND. GPIO 34-39 have NO internal pull-up, so each button
+// on those pins needs an external 10k resistor from the GPIO to 3.3 V.
+#define BUTTON_PIN_RED     39
+#define BUTTON_PIN_GREEN   36
+#define BUTTON_PIN_BLUE    15
+#define BUTTON_PIN_YELLOW  35
 
 #define LED_PIN_RED        2
 #define LED_PIN_GREEN      4
-#define LED_PIN_BLUE       5
-#define LED_PIN_YELLOW     18
+#define LED_PIN_BLUE       12
+#define LED_PIN_YELLOW     14
 
 // ---------- LED strips ----------
 #define LED_TYPE           WS2812B

@@ -12,22 +12,24 @@ Success criteria:
 - Firmware can be re-flashed over WiFi with `pio run -t upload` (USB only for the first flash).
 - Every tunable value (timing, colors, brightness, pins, animation speeds) lives in one file, `include/config.h`, so it can be tuned during physical testing.
 
-## Hardware (same as reference)
+## Hardware
+
+Pinout updated 2026-10-03 for the actual board (ESP32 Ethernet module, likely WT32-ETH01, where the reference pins 13/18/27 are unavailable).
 
 | Function        | GPIO |
 |-----------------|------|
-| Red button      | 13   |
-| Green button    | 12   |
-| Blue button     | 14   |
-| Yellow button   | 27   |
+| Red button      | 39   |
+| Green button    | 36   |
+| Blue button     | 15   |
+| Yellow button   | 35   |
 | Red strip data  | 2    |
 | Green strip data| 4    |
-| Blue strip data | 5    |
-| Yellow strip data | 18 |
+| Blue strip data | 12   |
+| Yellow strip data | 14 |
 
 - Board: ESP32 DevKit (`esp32dev`).
 - Strips: 5V WS2812B, 8 LEDs each, GRB order.
-- Buttons wired GPIO → button → GND, using internal pull-ups (pressed = LOW).
+- Buttons wired GPIO → button → GND (pressed = LOW). GPIO 35/36/39 have no internal pull-up: external 10 kΩ to 3.3 V required; GPIO 15 uses the internal pull-up.
 
 ## Toolchain
 
