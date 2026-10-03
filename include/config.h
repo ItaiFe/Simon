@@ -81,9 +81,9 @@ constexpr uint32_t ROUND_CLEARED_COLOR = 0x00FF40;
 
 // ---------- Game over ----------
 constexpr uint32_t GAME_OVER_COLOR    = 0xFF0000;
-constexpr uint8_t  GAME_OVER_FLASHES  = 0;    // all-strip red flashes (0 = off)
+constexpr uint8_t  GAME_OVER_FLASHES  = 2;    // all-strip red flashes (0 = off)
 constexpr uint32_t GAME_OVER_FLASH_MS = 250;  // on time (off time is the same)
-constexpr uint8_t  GAME_OVER_BLINKS   = 3;    // blinks of the strip you should have pressed
+constexpr uint8_t  GAME_OVER_BLINKS   = 0;    // blinks of the strip you should have pressed (0 = off)
 constexpr uint32_t GAME_OVER_BLINK_MS = 300;
 
 // ---------- Victory (~6 s) ----------
