@@ -14,22 +14,22 @@ Success criteria:
 
 ## Hardware
 
-Pinout updated 2026-10-03 for the actual board (ESP32 Ethernet module, likely WT32-ETH01, where the reference pins 13/18/27 are unavailable).
+Pinout updated 2026-10-03 for the actual board, a WT32-ETH01 (reference pins 13/18/27 are unavailable there). Buttons sit on the boot-strapping pins, which a button can only pull LOW (safe); LED data uses plain outputs.
 
 | Function        | GPIO |
 |-----------------|------|
-| Red button      | 39   |
-| Green button    | 36   |
-| Blue button     | 15   |
-| Yellow button   | 35   |
-| Red strip data  | 2    |
-| Green strip data| 4    |
-| Blue strip data | 12   |
-| Yellow strip data | 14 |
+| Red button      | 12   |
+| Green button    | 15   |
+| Blue button     | 2    |
+| Yellow button   | 5 (RXD2) |
+| Red strip data  | 4    |
+| Green strip data| 14   |
+| Blue strip data | 32 (CFG) |
+| Yellow strip data | 33 (485_EN) |
 
 - Board: ESP32 DevKit (`esp32dev`).
 - Strips: 5V WS2812B, 8 LEDs each, GRB order.
-- Buttons wired GPIO → button → GND (pressed = LOW). GPIO 35/36/39 have no internal pull-up: external 10 kΩ to 3.3 V required; GPIO 15 uses the internal pull-up.
+- Buttons wired GPIO → button → GND, using internal pull-ups (pressed = LOW).
 
 ## Toolchain
 

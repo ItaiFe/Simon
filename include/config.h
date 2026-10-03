@@ -8,17 +8,19 @@
 // =====================================================================
 
 // ---------- Pins (ESP32 GPIO numbers) ----------
-// Buttons: GPIO -> button -> GND. GPIO 34-39 have NO internal pull-up, so each button
-// on those pins needs an external 10k resistor from the GPIO to 3.3 V.
-#define BUTTON_PIN_RED     39
-#define BUTTON_PIN_GREEN   36
-#define BUTTON_PIN_BLUE    15
-#define BUTTON_PIN_YELLOW  35
+// Board: WT32-ETH01. Buttons go GPIO -> button -> GND (internal pull-ups, no resistors).
+// Buttons sit on the boot-strapping pins (12, 15, 2, 5): a button can only pull them LOW,
+// which is safe for booting and flashing. LED data uses plain output pins.
+// Avoid GPIO 34-39 for buttons: input-only with no internal pull-up.
+#define BUTTON_PIN_RED     12
+#define BUTTON_PIN_GREEN   15
+#define BUTTON_PIN_BLUE    2
+#define BUTTON_PIN_YELLOW  5   // labeled RXD2 on the board
 
-#define LED_PIN_RED        2
-#define LED_PIN_GREEN      4
-#define LED_PIN_BLUE       12
-#define LED_PIN_YELLOW     14
+#define LED_PIN_RED        4
+#define LED_PIN_GREEN      14
+#define LED_PIN_BLUE       32  // labeled CFG on the board
+#define LED_PIN_YELLOW     33  // labeled 485_EN on the board
 
 // ---------- LED strips ----------
 #define LED_TYPE           WS2812B
