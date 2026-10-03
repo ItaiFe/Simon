@@ -117,11 +117,10 @@ bool victory(uint32_t t, uint32_t now) {
   const uint32_t fadeEnd = flashEnd + VICTORY_FADE_MS;
 
   if (t < chaseEnd) {
-    static const uint8_t trail[NUM_STRIPS] = {255, 90, 25, 0};  // head, then fading tail
     const uint8_t head = (t / VICTORY_CHASE_STEP_MS) % NUM_STRIPS;
     for (uint8_t s = 0; s < NUM_STRIPS; s++) {
       const uint8_t dist = (head + NUM_STRIPS - s) % NUM_STRIPS;
-      Leds::fillStrip(s, Leds::scaled(STRIP_COLORS[s], trail[dist]));
+      Leds::fillStrip(s, Leds::scaled(STRIP_COLORS[s], VICTORY_CHASE_TRAIL[dist]));
     }
     return false;
   }
@@ -129,7 +128,7 @@ bool victory(uint32_t t, uint32_t now) {
     for (uint8_t s = 0; s < NUM_STRIPS; s++)
       fadeToBlackBy(Leds::strips[s], LEDS_PER_STRIP, VICTORY_CONFETTI_FADE);
     for (uint8_t n = 0; n < VICTORY_CONFETTI_PER_FRAME; n++)
-      Leds::strips[random8(NUM_STRIPS)][random8(LEDS_PER_STRIP)] = CHSV(random8(), 200, 255);
+      Leds::strips[random8(NUM_STRIPS)][random8(LEDS_PER_STRIP)] = CHSV(random8(), VICTORY_CONFETTI_SATURATION, 255);
     return false;
   }
   if (t < flashEnd) {

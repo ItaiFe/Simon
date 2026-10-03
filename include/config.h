@@ -77,15 +77,18 @@ constexpr uint32_t GAME_OVER_BLINK_MS = 300;
 // ---------- Victory (~6 s) ----------
 constexpr uint32_t VICTORY_CHASE_MS           = 2000;  // light spinning around the 4 strips
 constexpr uint32_t VICTORY_CHASE_STEP_MS      = 90;    // lower = faster spin
+constexpr uint8_t  VICTORY_CHASE_TRAIL[NUM_STRIPS] = {255, 90, 25, 0};  // head, then fading tail
 constexpr uint32_t VICTORY_CONFETTI_MS        = 2500;  // rainbow confetti
 constexpr uint8_t  VICTORY_CONFETTI_PER_FRAME = 3;
 constexpr uint8_t  VICTORY_CONFETTI_FADE      = 40;    // higher = shorter confetti trails
+constexpr uint8_t  VICTORY_CONFETTI_SATURATION = 200;  // 0 = white confetti, 255 = pure colors
 constexpr uint8_t  VICTORY_FLASHES            = 3;     // white flashes at the end
 constexpr uint32_t VICTORY_FLASH_MS           = 200;
 constexpr uint32_t VICTORY_FADE_MS            = 600;   // fade back into idle
 
 // ---------- OTA ----------
 constexpr uint32_t OTA_PROGRESS_COLOR = 0x00C8FF;
+constexpr uint32_t OTA_ERROR_SHOW_MS  = 1000;  // red shown after a failed upload
 
 // ---------- Network / system ----------
 #define HOSTNAME "simon"  // device is reachable as simon.local (also update upload_port in platformio.ini)
