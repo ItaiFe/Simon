@@ -104,6 +104,26 @@ constexpr uint32_t OTA_PROGRESS_FRAME_MS = 200;  // min time between progress re
 constexpr uint8_t  OTA_PROGRESS_LEVEL = 40;   // keep low: a bright full bar draws enough power to break uploads
 constexpr uint32_t OTA_ERROR_SHOW_MS  = 1000;  // red shown after a failed upload
 
+// ---------- Flamingo pairing (hold all 4 buttons in idle) ----------
+#define FLAMINGO_HOST "flamingo-esp32.local"         // mDNS name or IP address of the Flamingo
+constexpr uint16_t FLAMINGO_PORT              = 5000;
+constexpr uint8_t  FLAMINGO_SIMON_ID          = 5;      // stations are 1-4
+constexpr uint32_t FLAMINGO_KEEPALIVE_MS      = 100;    // resend current colour this often while paired
+constexpr uint8_t  FLAMINGO_REPEATS           = 3;      // win/unpair packets are sent this many times
+constexpr uint32_t FLAMINGO_RESOLVE_RETRY_MS  = 10000;  // idle-only lookup retry while unresolved
+constexpr uint32_t FLAMINGO_RESOLVE_TIMEOUT_MS = 300;   // max time one lookup may block
+constexpr uint32_t PAIR_HOLD_MS               = 2000;   // hold all 4 buttons this long to pair
+constexpr uint32_t PAIR_COLOR                 = 0xFF1493;  // pink
+constexpr uint8_t  PAIR_FLASHES               = 2;      // pink flashes when paired
+constexpr uint32_t PAIR_FLASH_MS              = 200;    // on time (off time is the same)
+
+// ---------- Ethernet (WT32-ETH01 / ESP32-ETH01, LAN8720) ----------
+constexpr bool ETH_ENABLED         = true;   // Ethernet first; WiFi only while the cable is down
+constexpr uint8_t ETH01_PHY_ADDR   = 1;
+constexpr int ETH01_PHY_POWER_PIN  = 16;
+constexpr int ETH01_MDC_PIN        = 23;
+constexpr int ETH01_MDIO_PIN       = 18;
+
 // ---------- Network / system ----------
 #define HOSTNAME "simon"  // device is reachable as simon.local (also update upload_port in platformio.ini)
 constexpr uint32_t WIFI_RETRY_MS = 15000;
@@ -122,3 +142,6 @@ static_assert(PULSE_FADE_PERCENT <= 100, "PULSE_FADE_PERCENT must be 0-100");
 static_assert(FRAME_MS > 0, "FRAME_MS must be > 0");
 static_assert(START_SEQUENCE_LEN >= 1 && START_SEQUENCE_LEN <= MAX_SEQUENCE_LEN && MAX_SEQUENCE_LEN <= 64,
               "need 1 <= START_SEQUENCE_LEN <= MAX_SEQUENCE_LEN <= 64");
+static_assert(FLAMINGO_KEEPALIVE_MS > 0 && PAIR_HOLD_MS > 0 && PAIR_FLASH_MS > 0,
+              "Flamingo/pairing timings must be > 0");
+static_assert(FLAMINGO_SIMON_ID > 4, "FLAMINGO_SIMON_ID must not collide with stations 1-4");

@@ -8,4 +8,5 @@ typedef void (*EndFn)(bool ok);
 
 void begin(ProgressFn onProgress, EndFn onEnd);
 void update(uint32_t now);
+bool connected();  // true when any network interface has an IP
 }  // namespace Net

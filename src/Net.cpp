@@ -70,3 +70,5 @@ void Net::update(uint32_t now) {
     WiFi.reconnect();
   }
 }
+
+bool Net::connected() { return WiFi.status() == WL_CONNECTED; }
