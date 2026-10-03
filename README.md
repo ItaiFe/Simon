@@ -33,6 +33,20 @@ Leave IO0, TXD and RXD free for flashing (FTDI TX → RXD, FTDI RX → TXD, GND 
 
 Boot animation → idle glow. Press any button to start. Watch the sequence, repeat it. Round 1 is 3 colors; each round adds one and plays faster, up to 10. A wrong press or taking too long ends the game (red flash, then the button you should have pressed blinks). Clear round 8 for the victory show.
 
+## Flamingo pairing
+
+Hold **all 4 buttons for 2 seconds** while Simon is idle. The strips fill with pink as you hold; at 2 s Simon and the Flamingo flash pink together. Release the buttons and the game starts — the Flamingo's whole body now mirrors Simon's colours.
+
+- A **wrong press / timeout** ends the game with 4 red flashes (on the Flamingo too) and unpairs: the Flamingo goes back to its rainbow and the stations work again.
+- A **win** makes the Flamingo party for 10 s, then it unpairs.
+- While paired, the stations are ignored. If Simon loses power, the Flamingo unpairs by itself after 2 s.
+- Simon talks to `flamingo-esp32.local` on UDP 5000 as station ID 5 (`FLAMINGO_*` in `config.h`). The Flamingo needs its `simon-pairing` firmware (Flamingods repo). If the Flamingo is off or unreachable, Simon still plays normally.
+- A normal game starts when you **release** a button.
+
+## Network
+
+Simon prefers **Ethernet** (plug a cable into the board): WiFi turns off while the cable is up and comes back automatically if it's unplugged. OTA uploads, `simon.local` and the Flamingo link work on either. Disable Ethernet with `ETH_ENABLED = false`.
+
 ## Tuning
 
 Everything is in **`include/config.h`** — edit, then `pio run -e ota -t upload` (~30 s).
@@ -65,3 +79,11 @@ Everything is in **`include/config.h`** — edit, then `pio run -e ota -t upload
 - [ ] Press two buttons at the same instant during input: serial shows two `Press …` lines (lowest color first).
 - [ ] Router off (or `wifi_ssid` empty): device still boots straight into the animation and plays; serial shows WiFi retry messages.
 - [ ] `pio run -e ota -t upload` works with the USB cable unplugged.
+- [ ] Pairing: hold all 4 buttons 2 s → pink fill, then Simon and Flamingo flash pink; the game shows on the Flamingo in sync.
+- [ ] Holding only 3 buttons, or letting go before 2 s, does nothing (no pairing, no game).
+- [ ] Wrong press while paired → red flashes on both, then the Flamingo returns to its rainbow; stations work again.
+- [ ] Winning while paired → Flamingo party, then rainbow.
+- [ ] Press a station during a paired game → the Flamingo keeps showing Simon only.
+- [ ] Power Simon off mid-game while paired → Flamingo returns to rainbow within ~2 s.
+- [ ] Flamingo switched off → pairing still flashes pink on Simon and the game plays normally without stutter.
+- [ ] Ethernet cable in → serial `Ethernet up …, WiFi off`; pull it → `Ethernet down, WiFi fallback`; OTA works both ways.
