@@ -7,6 +7,7 @@ namespace {
 
 const float TWO_PI_F = 6.2831853f;
 uint8_t sparkle[NUM_STRIPS][LEDS_PER_STRIP];
+uint8_t sparkleHue[NUM_STRIPS][LEDS_PER_STRIP];
 
 // True during the "on" half of a blink with the given on/off time.
 bool blinkOn(uint32_t t, uint32_t halfPeriodMs) { return (t / halfPeriodMs) % 2 == 0; }
@@ -19,18 +20,29 @@ void idle(uint32_t now) {
   const float breathPhase = TWO_PI_F * (float)(now % IDLE_BREATH_PERIOD_MS) / IDLE_BREATH_PERIOD_MS;
   const float shimmerPhase =
       TWO_PI_F * (float)(now % IDLE_SHIMMER_PERIOD_MS) / IDLE_SHIMMER_PERIOD_MS;
+  const uint32_t travelled = (uint64_t)now * IDLE_COMET_SPEED / 1000;  // LEDs of travel since boot
   for (uint8_t s = 0; s < NUM_STRIPS; s++) {
     // Each strip breathes a quarter-cycle behind the previous one, so the glow rotates.
     const float breath = 0.5f + 0.5f * sinf(breathPhase - s * (TWO_PI_F / NUM_STRIPS));
-    if (random8() < IDLE_SPARKLE_CHANCE) sparkle[s][random8(LEDS_PER_STRIP)] = IDLE_SPARKLE_LEVEL;
+    // Comets repeat every IDLE_COMET_SPACING LEDs; each strip is offset so they don't move in lockstep.
+    const uint32_t cometHead = (travelled + s * IDLE_COMET_SPACING / NUM_STRIPS) % IDLE_COMET_SPACING;
+    if (random8() < IDLE_SPARKLE_CHANCE) {
+      const uint8_t i = random8(LEDS_PER_STRIP);
+      sparkle[s][i] = IDLE_SPARKLE_LEVEL;
+      sparkleHue[s][i] = random8();
+    }
     for (uint8_t i = 0; i < LEDS_PER_STRIP; i++) {
       const float shimmer = 0.5f + 0.5f * sinf(shimmerPhase + i * IDLE_SHIMMER_SPACING);
       const float level = IDLE_MIN_LEVEL + (1.0f - IDLE_MIN_LEVEL) * breath *
                                                (1.0f - IDLE_SHIMMER_DEPTH + IDLE_SHIMMER_DEPTH * shimmer);
       CRGB c = Leds::scaled(STRIP_COLORS[s], (uint8_t)(level * IDLE_MAX_BRIGHTNESS));
+      const uint8_t behind = (cometHead + IDLE_COMET_SPACING - i % IDLE_COMET_SPACING) % IDLE_COMET_SPACING;
+      if (behind < IDLE_COMET_TAIL) {
+        c += Leds::scaled(STRIP_COLORS[s], 255 - behind * 255 / IDLE_COMET_TAIL);
+        if (behind == 0) c += CRGB(IDLE_COMET_HEAD_WHITE, IDLE_COMET_HEAD_WHITE, IDLE_COMET_HEAD_WHITE);
+      }
       const uint8_t sp = sparkle[s][i];
-      c += Leds::scaled(STRIP_COLORS[s], sp);
-      c += CRGB(sp / 4, sp / 4, sp / 4);
+      if (sp) c += CHSV(sparkleHue[s][i], IDLE_SPARKLE_SATURATION, sp);
       Leds::strips[s][i] = c;
       sparkle[s][i] = qsub8(sp, IDLE_SPARKLE_DECAY);
     }
@@ -154,7 +166,7 @@ void otaProgress(float fraction) {
       float level = lit - i;  // partial brightness on the leading LED
       if (level < 0) level = 0;
       if (level > 1) level = 1;
-      Leds::strips[s][i] = Leds::scaled(OTA_PROGRESS_COLOR, (uint8_t)(level * 255));
+      Leds::strips[s][i] = Leds::scaled(OTA_PROGRESS_COLOR, (uint8_t)(level * OTA_PROGRESS_LEVEL));
     }
   }
 }

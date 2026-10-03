@@ -58,15 +58,22 @@ constexpr uint8_t  BOOT_WHITE_LEVEL        = 200;
 constexpr uint32_t BOOT_FADE_MS            = 600;  // white fades into the idle animation
 
 // ---------- Idle animation ----------
-constexpr uint8_t  IDLE_MAX_BRIGHTNESS    = 90;     // 0-255, applied on top of MAX_BRIGHTNESS
-constexpr float    IDLE_MIN_LEVEL         = 0.15f;  // dimmest point of the breath (0-1)
-constexpr uint32_t IDLE_BREATH_PERIOD_MS  = 4000;   // one breath; strips are offset so it rotates
-constexpr uint32_t IDLE_SHIMMER_PERIOD_MS = 1800;   // wave travelling along each strip
-constexpr float    IDLE_SHIMMER_SPACING   = 0.8f;   // wave phase between neighbouring LEDs (radians)
-constexpr float    IDLE_SHIMMER_DEPTH     = 0.35f;  // 0 = no shimmer, 1 = full
-constexpr uint8_t  IDLE_SPARKLE_CHANCE    = 6;      // per strip per frame, out of 255
-constexpr uint8_t  IDLE_SPARKLE_LEVEL     = 200;    // sparkle peak brightness
-constexpr uint8_t  IDLE_SPARKLE_DECAY     = 12;     // sparkle fade per frame
+constexpr uint8_t  IDLE_MAX_BRIGHTNESS    = 140;    // 0-255, applied on top of MAX_BRIGHTNESS
+constexpr float    IDLE_MIN_LEVEL         = 0.35f;  // dimmest point of the breath (0-1)
+constexpr uint32_t IDLE_BREATH_PERIOD_MS  = 2000;   // one breath; strips are offset so it rotates
+constexpr uint32_t IDLE_SHIMMER_PERIOD_MS = 700;    // wave travelling along each strip
+constexpr float    IDLE_SHIMMER_SPACING   = 0.25f;  // wave phase between neighbouring LEDs (radians)
+constexpr float    IDLE_SHIMMER_DEPTH     = 0.3f;   // 0 = no shimmer, 1 = full
+// Comets: bright streaks chase each other up each strip in its color, without pause.
+constexpr uint32_t IDLE_COMET_SPEED       = 65;     // LEDs per second
+constexpr uint8_t  IDLE_COMET_TAIL        = 12;     // tail length in LEDs (0 = no comets)
+constexpr uint8_t  IDLE_COMET_SPACING     = 30;     // distance between comets in LEDs (> tail)
+constexpr uint8_t  IDLE_COMET_HEAD_WHITE  = 90;     // white added to the comet head (0-255)
+// Confetti sparkles in random colors.
+constexpr uint8_t  IDLE_SPARKLE_CHANCE    = 40;     // per strip per frame, out of 255
+constexpr uint8_t  IDLE_SPARKLE_LEVEL     = 220;    // sparkle peak brightness
+constexpr uint8_t  IDLE_SPARKLE_DECAY     = 8;      // sparkle fade per frame (lower = longer)
+constexpr uint8_t  IDLE_SPARKLE_SATURATION = 170;   // 0 = white sparkles, 255 = vivid colors
 
 // ---------- Round cleared ----------
 constexpr uint32_t ROUND_CLEARED_MS    = 400;
@@ -93,6 +100,7 @@ constexpr uint32_t VICTORY_FADE_MS            = 600;   // fade back into idle
 
 // ---------- OTA ----------
 constexpr uint32_t OTA_PROGRESS_COLOR = 0x00C8FF;
+constexpr uint8_t  OTA_PROGRESS_LEVEL = 40;   // keep low: a bright full bar draws enough power to break uploads
 constexpr uint32_t OTA_ERROR_SHOW_MS  = 1000;  // red shown after a failed upload
 
 // ---------- Network / system ----------
@@ -105,6 +113,7 @@ constexpr uint32_t SERIAL_BAUD   = 115200;
 // ---------- Sanity checks: a bad value fails the build instead of crashing the device ----------
 static_assert(IDLE_BREATH_PERIOD_MS > 0 && IDLE_SHIMMER_PERIOD_MS > 0, "idle periods must be > 0");
 static_assert(VICTORY_CHASE_STEP_MS > 0, "VICTORY_CHASE_STEP_MS must be > 0");
+static_assert(IDLE_COMET_SPACING > IDLE_COMET_TAIL, "IDLE_COMET_SPACING must be larger than IDLE_COMET_TAIL");
 static_assert(ROUND_CLEARED_MS == 0 || ROUND_CLEARED_MS >= 2, "ROUND_CLEARED_MS must be 0 or >= 2");
 static_assert(ON_MS_FIRST + GAP_MS_FIRST > 0 && ON_MS_LAST + GAP_MS_LAST > 0,
               "on + gap time must be > 0 for every round");
