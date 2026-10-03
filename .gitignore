@@ -1,4 +1,4 @@
 .pio/
-include/secrets.h
+secrets.ini
 .DS_Store
 .vscode/

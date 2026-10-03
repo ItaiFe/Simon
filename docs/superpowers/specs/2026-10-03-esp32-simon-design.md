@@ -34,7 +34,7 @@ Success criteria:
 - PlatformIO, Arduino framework, FastLED.
 - Environments in `platformio.ini`:
   - `esp32dev` — USB serial upload (first flash).
-  - `ota` — extends `esp32dev`, `upload_protocol = espota`, `upload_port = simon.local`, OTA password passed via `upload_flags`.
+  - `ota` — extends `esp32dev`, `upload_protocol = espota`, `upload_port = simon.local`, OTA password passed via `upload_flags` from `secrets.ini` (`extra_configs`).
   - `native` — host build for unit tests of pure game logic.
 
 ## Architecture
@@ -50,8 +50,10 @@ Non-blocking main loop. `loop()` never calls `delay()` for more than a few ms; e
 ```
 platformio.ini
 include/config.h          # ALL tunables, grouped and commented
-include/secrets.example.h # template; copy to secrets.h
-include/secrets.h         # git-ignored: WIFI_SSID, WIFI_PASSWORD, OTA_PASSWORD
+secrets.example.ini       # template; copy to secrets.ini
+secrets.ini               # git-ignored: wifi_ssid, wifi_password, ota_password
+                          # (fed to firmware as build flags AND to espota upload auth)
+src/Log.h                 # LOG(...) macro
 lib/SimonGame/            # pure C++ game logic, no Arduino deps
   SimonGame.h / .cpp
 src/main.cpp              # state machine wiring
@@ -151,7 +153,8 @@ Changing behavior during tuning should require editing only `config.h`.
 
 - No WiFi / wrong credentials: game runs normally; WiFi retries in background; logged to serial.
 - OTA failure: red flash, then return to IDLE.
-- `secrets.h` missing: compile error with a clear message pointing to `secrets.example.h`.
+- `secrets.ini` missing: PlatformIO reports the missing `[secrets]` values; README points to `secrets.example.ini`.
+- Empty `wifi_ssid`: WiFi/OTA disabled, game runs, logged.
 
 ## Logging
 
