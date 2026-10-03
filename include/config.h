@@ -26,7 +26,7 @@
 #define LED_TYPE           WS2812B
 #define COLOR_ORDER        GRB          // try RGB if red and green look swapped
 constexpr uint8_t  NUM_STRIPS      = 4;
-constexpr uint8_t  LEDS_PER_STRIP  = 8;
+constexpr uint8_t  LEDS_PER_STRIP  = 50;
 constexpr uint8_t  MAX_BRIGHTNESS  = 160;   // global brightness cap, 0-255
 constexpr uint32_t POWER_LIMIT_MA  = 1500;  // FastLED dims everything to stay under this (5 V)
 // Strip colors as 0xRRGGBB. Pure yellow (0xFFFF00) looks greenish on WS2812B, so it is warmed up.
