@@ -11,6 +11,10 @@ bool pulse(uint8_t strip, uint32_t t, uint32_t durationMs);
 bool roundCleared(uint32_t t);
 bool gameOver(uint32_t t, uint8_t correctStrip);
 bool victory(uint32_t t, uint32_t now);
+void pairHold(float fraction, uint32_t now);  // idle with pink rising as the 4-button hold progresses
+bool pairFlash(uint32_t t);                   // pink flashes after pairing; true when finished
+bool pairFlashOn(uint32_t t);                 // pink is currently shown by pairFlash
+bool gameOverRedOn(uint32_t t);               // red is currently shown by gameOver
 void otaProgress(float fraction);
 void otaResult(bool ok);
 }  // namespace Animations

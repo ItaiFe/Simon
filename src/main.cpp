@@ -1,20 +1,36 @@
 #include <Arduino.h>
+#include <FlamingoLink.h>
 #include <SimonGame.h>
 #include "Animations.h"
 #include "Buttons.h"
+#include "Flamingo.h"
 #include "Leds.h"
 #include "Log.h"
 #include "Net.h"
 #include "config.h"
 
-enum class State : uint8_t { Boot, Idle, GetReady, Showing, Input, RoundCleared, Victory, GameOver };
+enum class State : uint8_t {
+  Boot,
+  Idle,
+  PairHold,
+  PairFlash,
+  GetReady,
+  Showing,
+  Input,
+  RoundCleared,
+  Victory,
+  GameOver
+};
 
 static const char* const COLOR_NAMES[NUM_STRIPS] = {"red", "green", "blue", "yellow"};
+static const int8_t GREEN = 1;
 
 static const char* stateName(State s) {
   switch (s) {
     case State::Boot: return "Boot";
     case State::Idle: return "Idle";
+    case State::PairHold: return "PairHold";
+    case State::PairFlash: return "PairFlash";
     case State::GetReady: return "GetReady";
     case State::Showing: return "Showing";
     case State::Input: return "Input";
@@ -46,6 +62,7 @@ static uint32_t lastFrame = 0;
 static uint32_t lastPressAt = 0;
 static int8_t pulseStrip = -1;  // strip lit by the player's latest press, -1 = none
 static uint32_t pulseStart = 0;
+static bool startArmed = false;  // a press in Idle starts a game once every button is released
 
 static void enter(State next, uint32_t now) {
   state = next;
@@ -55,6 +72,13 @@ static void enter(State next, uint32_t now) {
   if (next == State::Input) {
     lastPressAt = now;
     pulseStrip = -1;
+  }
+  if (next == State::Idle) {
+    startArmed = false;
+    if (Flamingo::link().paired()) {
+      LOG("Flamingo: unpair");
+      Flamingo::link().endWithUnpair();
+    }
   }
   LOG("-> %s", stateName(next));
 }
@@ -68,6 +92,12 @@ static void logRound() {
   }
   LOG("Round %u/%u: %s(on %u ms, gap %u ms, timeout %u ms)", game.round(), game.totalRounds(),
       seq.c_str(), tm.onMs, tm.gapMs, tm.timeoutMs);
+}
+
+static void startGame(uint32_t now) {
+  LOG("Start (%s game)", Flamingo::link().paired() ? "paired" : "normal");
+  game.start(esp_random());
+  enter(State::GetReady, now);
 }
 
 static void onOtaProgress(float fraction) {
@@ -105,6 +135,10 @@ static void handlePress(int8_t color, uint32_t now) {
       break;
     case PressResult::Won:
       LOG("Press %s: WON!", COLOR_NAMES[color]);
+      if (Flamingo::link().paired()) {
+        LOG("Flamingo: party");
+        Flamingo::link().endWithWin();
+      }
       enter(State::Victory, now);
       break;
     case PressResult::Wrong:
@@ -114,10 +148,11 @@ static void handlePress(int8_t color, uint32_t now) {
   }
 }
 
-// Advances the state machine and draws one frame.
+// Advances the state machine, draws one frame and tells the Flamingo what Simon shows.
 static void step(uint32_t now) {
   const uint32_t t = now - stateStart;
   const int8_t press = buttons.pressed();
+  uint8_t mirror = FlamingoValue::kDark;
 
   switch (state) {
     case State::Boot:
@@ -126,12 +161,36 @@ static void step(uint32_t now) {
 
     case State::Idle:
       Animations::idle(now);
-      if (press >= 0) {
-        LOG("Start pressed (%s)", COLOR_NAMES[press]);
-        game.start(esp_random());
-        enter(State::GetReady, now);
+      if (buttons.allHeld()) {
+        LOG("All buttons held - pairing...");
+        enter(State::PairHold, now);
+        break;
+      }
+      if (press >= 0) startArmed = true;
+      if (startArmed && !buttons.anyHeld()) startGame(now);
+      break;
+
+    case State::PairHold:
+      if (!buttons.allHeld()) {
+        LOG("Pairing cancelled");
+        enter(State::Idle, now);
+        break;
+      }
+      Animations::pairHold((float)t / PAIR_HOLD_MS, now);
+      if (t >= PAIR_HOLD_MS) {
+        LOG("Paired with Flamingo");
+        Flamingo::refresh();
+        Flamingo::link().pair();
+        enter(State::PairFlash, now);
       }
       break;
+
+    case State::PairFlash: {
+      const bool done = Animations::pairFlash(t);
+      mirror = Animations::pairFlashOn(t) ? FlamingoValue::kPink : FlamingoValue::kDark;
+      if (done && !buttons.anyHeld()) startGame(now);
+      break;
+    }
 
     case State::GetReady:
       if (Animations::getReady(t)) {
@@ -155,8 +214,12 @@ static void step(uint32_t now) {
         break;
       }
       const uint32_t within = elapsed % stepMs;
-      if (within < tm.onMs) Animations::pulse(game.colorAt(idx), within, tm.onMs);
-      else Leds::clear();
+      if (within < tm.onMs) {
+        Animations::pulse(game.colorAt(idx), within, tm.onMs);
+        mirror = FlamingoValue::forColor(game.colorAt(idx));
+      } else {
+        Leds::clear();
+      }
       break;
     }
 
@@ -164,6 +227,7 @@ static void step(uint32_t now) {
       if (pulseStrip >= 0 && Animations::pulse(pulseStrip, now - pulseStart, PRESS_PULSE_MS))
         pulseStrip = -1;
       if (pulseStrip < 0) Leds::clear();
+      mirror = FlamingoValue::forColor(pulseStrip);
       if (press >= 0) {
         handlePress(press, now);
       } else if (now - lastPressAt > game.timing().timeoutMs) {
@@ -176,10 +240,13 @@ static void step(uint32_t now) {
       // Finish the last press's pulse, then the green "cleared" pulse.
       if (t < PRESS_PULSE_MS) {
         Animations::pulse(pulseStrip, t, PRESS_PULSE_MS);
+        mirror = FlamingoValue::forColor(pulseStrip);
       } else if (Animations::roundCleared(t - PRESS_PULSE_MS)) {
         game.nextRound();
         logRound();
         enter(State::Showing, now);
+      } else {
+        mirror = FlamingoValue::forColor(GREEN);
       }
       break;
 
@@ -192,10 +259,13 @@ static void step(uint32_t now) {
       break;
 
     case State::GameOver:
+      mirror = Animations::gameOverRedOn(t) ? FlamingoValue::forColor(0) : FlamingoValue::kDark;
       if (Animations::gameOver(t, game.expectedColor())) enter(State::Idle, now);
       break;
   }
 
+  Flamingo::link().setValue(mirror);
+  Flamingo::update(now, Net::connected(), state == State::Idle);
   Leds::show();
 }
 

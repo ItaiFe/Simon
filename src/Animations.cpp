@@ -111,7 +111,7 @@ bool gameOver(uint32_t t, uint8_t correctStrip) {
   const uint32_t blinkEnd = flashEnd + GAME_OVER_BLINKS * 2 * GAME_OVER_BLINK_MS;
   Leds::clear();
   if (t < flashEnd) {
-    if (blinkOn(t, GAME_OVER_FLASH_MS)) Leds::fillAll(CRGB(GAME_OVER_COLOR));
+    if (gameOverRedOn(t)) Leds::fillAll(CRGB(GAME_OVER_COLOR));
     return false;
   }
   if (t < blinkEnd) {
@@ -155,6 +155,30 @@ bool victory(uint32_t t, uint32_t now) {
     return false;
   }
   return true;
+}
+
+bool gameOverRedOn(uint32_t t) {
+  return t < GAME_OVER_FLASHES * 2 * GAME_OVER_FLASH_MS && blinkOn(t, GAME_OVER_FLASH_MS);
+}
+
+bool pairFlashOn(uint32_t t) {
+  return t < PAIR_FLASHES * 2 * PAIR_FLASH_MS && blinkOn(t, PAIR_FLASH_MS);
+}
+
+void pairHold(float fraction, uint32_t now) {
+  idle(now);
+  if (fraction < 0) fraction = 0;
+  if (fraction > 1) fraction = 1;
+  const uint8_t lit = (uint8_t)(fraction * LEDS_PER_STRIP);
+  for (uint8_t s = 0; s < NUM_STRIPS; s++)
+    for (uint8_t i = 0; i < lit; i++) Leds::strips[s][i] = CRGB(PAIR_COLOR);
+}
+
+bool pairFlash(uint32_t t) {
+  Leds::clear();
+  if (t >= PAIR_FLASHES * 2 * PAIR_FLASH_MS) return true;
+  if (pairFlashOn(t)) Leds::fillAll(CRGB(PAIR_COLOR));
+  return false;
 }
 
 void otaProgress(float fraction) {
